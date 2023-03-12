@@ -16,8 +16,9 @@ class LexicalAnalyzer {
     private final int LETTER = 0;
     private final int DIGIT = 1;
     private final int UNKNOWN = 99;
-    private  final int EOF = 100;
+    private final int EOF = 100;
     /* Token codes */
+    private final int RES_WORD = 9;
     private final int INT_LIT = 10;
     private final int IDENT = 11;
     private final int ASSIGN_OP = 20;
@@ -27,6 +28,12 @@ class LexicalAnalyzer {
     private final int DIV_OP = 24;
     private final int LEFT_PAREN = 25;
     private final int RIGHT_PAREN = 26;
+    private final int SEMI_COLON = 27;
+    private final int PER = 28;
+    private final int DOUBLE_QUOTE = 29;
+    private final int MOD = 30;
+    private final int COLON = 31;
+    private final int SINGLE_QUOTE = 32;
 
     /* Constructor */
     public LexicalAnalyzer(String filename) throws IOException {
@@ -35,7 +42,7 @@ class LexicalAnalyzer {
             getChar();
 
             while (nextToken != EOF) {
-                lex();
+                nextToken = lex();
             }
 
             in_fp.close();
@@ -53,7 +60,8 @@ class LexicalAnalyzer {
             System.out.println("Error - lexeme is too long");
     }
 
-    // reads a character from an input stream and classifies it as a letter, digit, unknown, or end of file.
+    // reads a character from an input stream and classifies it as a letter, digit,
+    // unknown, or end of file.
     public void getChar() throws IOException {
         try {
             int temp = in_fp.read();
@@ -61,7 +69,7 @@ class LexicalAnalyzer {
             if (temp != -1) {
                 nextChar = (char) temp;
 
-                if (ValidCharacters.isValidCharacters(nextChar)){
+                if (ValidCharacters.isValidCharacters(nextChar)) {
                     if (Character.isLetter(nextChar))
                         charClass = LETTER;
                     else if (Character.isDigit(nextChar))
@@ -78,38 +86,58 @@ class LexicalAnalyzer {
     }
 
     public void getNonBlank() throws IOException {
-        while (Character.isWhitespace(nextChar))
+        while (Character.isWhitespace(nextChar) && charClass != 100)
             getChar();
     }
 
     public int lookup(char ch) throws IOException {
         if (ch == '(') {
             addChar();
-            return TokenTypes.LEFT_PAREN;
+            return LEFT_PAREN;
         } else if (ch == ')') {
             addChar();
-            return TokenTypes.RIGHT_PAREN;
+            return RIGHT_PAREN;
         } else if (ch == '+') {
             addChar();
-            return TokenTypes.ADD_OP;
+            return ADD_OP;
         } else if (ch == '-') {
             addChar();
-            return TokenTypes.SUB_OP;
+            return SUB_OP;
         } else if (ch == '*') {
             addChar();
-            return TokenTypes.MULT_OP;
+            return MULT_OP;
         } else if (ch == '/') {
             addChar();
-            return TokenTypes.DIV_OP;
+            return DIV_OP;
         } else if (ch == '=') {
             addChar();
-            return TokenTypes.ASSIGN_OP;
-        }  else {
+            return ASSIGN_OP;
+        } else if (ch == ';') {
             addChar();
-            return TokenTypes.UNKNOWN;
+            return SEMI_COLON;
+        } else if (ch == '.') {
+            addChar();
+            return PER;
+        } else if (ch == '“') {
+            addChar();
+            return DOUBLE_QUOTE;
+        } else if (ch == '”') {
+            addChar();
+            return DOUBLE_QUOTE;
+        } else if (ch == '%') {
+            addChar();
+            return MOD;
+        } else if (ch == ':') {
+            addChar();
+            return COLON;
+        } else if (ch == '\'') {
+            addChar();
+            return SINGLE_QUOTE;
+        } else {
+            addChar();
+            return UNKNOWN;
         }
     }
-
 
     public int lex() throws IOException {
         lexLen = 0;
@@ -123,7 +151,11 @@ class LexicalAnalyzer {
                     addChar();
                     getChar();
                 }
-                nextToken = IDENT;
+                if (ReservedWords.isReservedWord(String.valueOf(lexeme))) {
+                    nextToken = RES_WORD;
+                } else {
+                    nextToken = IDENT;
+                }
                 break;
             /* Parse integer literals */
             case DIGIT:
@@ -137,7 +169,7 @@ class LexicalAnalyzer {
                 break;
             /* Parentheses and operators */
             case UNKNOWN:
-                lookup(nextChar);
+                nextToken = lookup(nextChar);
                 getChar();
                 break;
             /* EOF */
@@ -148,8 +180,8 @@ class LexicalAnalyzer {
                 lexeme[2] = 'F';
                 break;
         }
-        System.out.println("Next token is: " + nextToken + " Next lexem is:"+lexeme);
-
+        System.out.println("Next token is: " + nextToken + " Next lexem is:" + String.valueOf(lexeme));
+        lexeme = new char[100];
         return nextToken;
     }
 }
