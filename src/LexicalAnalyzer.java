@@ -180,7 +180,7 @@ class LexicalAnalyzer {
                 lexeme[2] = 'F';
                 break;
         }
-        System.out.println("Next token is: " + nextToken + " Next lexem is:" + String.valueOf(lexeme));
+        System.out.println("Next token is: " + nextToken + " Next lexem is:" + String.valueOf(lexeme).trim());
         lexeme = new char[100];
         return nextToken;
     }
