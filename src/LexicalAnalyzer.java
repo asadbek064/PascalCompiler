@@ -67,7 +67,7 @@ class LexicalAnalyzer {
 
     // reads a character from an input stream and classifies it as a letter, digit,
     // unknown, or end of file.
-    public void getChar() throws IOException {
+    public void getChar() {
         try {
             int temp = in_fp.read();
 
@@ -123,10 +123,7 @@ class LexicalAnalyzer {
         } else if (ch == '.') {
             addChar();
             return PER;
-        } else if (ch == '“') {
-            addChar();
-            return DOUBLE_QUOTE;
-        } else if (ch == '”') {
+        } else if (ch == '"') {
             addChar();
             return DOUBLE_QUOTE;
         } else if (ch == '%') {
