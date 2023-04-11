@@ -10,7 +10,7 @@ PROGRAM  ChangeMaker;
   (* Input the Cost *)
   Write('Enter the  cost in cents: ');
   Read(Cost);
-  (* Make the  Change in dimes )
+  (* Make the  Change in dimes *)
   Remainder := 100 - Cost;
   Dimes :=  Remainder DIV 10;
   Remainder == Remainder % 10;
