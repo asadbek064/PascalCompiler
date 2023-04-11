@@ -5,12 +5,17 @@ public class Main {
         // default if none provided as argument
         String inputFile = "src/Input.txt";
         String outputFile = "src/Output.txt";
+        String outputFile2 = "src/Output2.txt";
 
         if (args.length > 1) {
             inputFile = args[0];
             outputFile = args[1];
         }
         /* Main driver */
-        new LexicalAnalyzer(inputFile, outputFile);
+        new LexicalAnalyzer(inputFile, outputFile, outputFile2);
+
+        String inputFileSyntax = outputFile2;
+        String outputFileSyntax = "src/OutputSyntax.txt";
+        new SyntaxAnalyzer(inputFileSyntax, outputFileSyntax);
     }
 }
