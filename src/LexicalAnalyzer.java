@@ -15,6 +15,7 @@ class LexicalAnalyzer {
     private FileReader in_fp;
 
     private FileWriter out_fp;
+    private FileWriter out_fp2;
     /* Character classes */
     private final int LETTER = 0;
     private final int DIGIT = 1;
@@ -39,10 +40,11 @@ class LexicalAnalyzer {
     private final int SINGLE_QUOTE = 32;
 
     /* Constructor */
-    public LexicalAnalyzer(String inputFileName, String outputFileName) throws IOException {
+    public LexicalAnalyzer(String inputFileName, String outputFileName, String outputFileName2) throws IOException {
         try {
             in_fp = new FileReader(inputFileName);
             out_fp = new FileWriter(outputFileName);
+            out_fp2 = new FileWriter(outputFileName2);
             getChar();
 
             while (nextToken != EOF) {
@@ -51,6 +53,7 @@ class LexicalAnalyzer {
 
             in_fp.close();
             out_fp.close();
+            out_fp2.close();
         } catch (FileNotFoundException e) {
             System.out.println("ERROR - cannot open " + inputFileName);
         }
@@ -184,7 +187,8 @@ class LexicalAnalyzer {
         }
 
         // write each result to out file
-        out_fp.write("Next token is: " + nextToken + "\tNext lexem is:" + String.valueOf(lexeme).trim() + "\n");
+        out_fp.write("Next token is: " + nextToken + "\tNext lexeme is:" + String.valueOf(lexeme).trim() + "\n");
+        out_fp2.write(nextToken + ",," + String.valueOf(lexeme).trim() + ",,");
 
         // for debugging
         System.out.println("Next token is: " + nextToken + "\tNext lexem is:" + String.valueOf(lexeme).trim() + "");
