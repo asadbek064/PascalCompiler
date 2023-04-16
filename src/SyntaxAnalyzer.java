@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.Stack;
 import java.util.List;
 
-
-
 public class SyntaxAnalyzer {
   /* Variables */
   private int j;
@@ -18,25 +16,24 @@ public class SyntaxAnalyzer {
   private FileWriter out_fp;
   private FileWriter out_fp2;
 
-
   /* Character classes */
   private final int LETTER = 0;
   private final int DIGIT = 1;
   private final int UNKNOWN = 99;
   private final int EOF = 100;
 
-
   /* Token codes */
-  /* converted to class based
-     easier to use while checking delimiters.
-     just call Token.[keyword]
+  /*
+   * converted to class based
+   * easier to use while checking delimiters.
+   * just call Token.[keyword]
    */
 
   /* Constructor */
   public SyntaxAnalyzer(String inputFileName, String outputFileName) throws IOException {
     try {
       out_fp = new FileWriter(outputFileName);
-      String content = Files.readString(Paths.get(inputFileName)).replace(",,;,,","");
+      String content = Files.readString(Paths.get(inputFileName)).replace(",,;,,", "");
       content = RemoveComments(content);
       String[] lines = content.split(",,27");
       int top_of_stack;
@@ -47,29 +44,32 @@ public class SyntaxAnalyzer {
 
         for (int i = 0; i < current_line_length; i += 2) {
           /*
-           System.out.print(current_line[i]);
-           System.out.print(current_line[i + 1]);
-          */
+           * System.out.print(current_line[i]);
+           * System.out.print(current_line[i + 1]);
+           */
           int current_token = Integer.parseInt(current_line[i]);
           String current_word = current_line[i + 1];
           // System.out.println(current_token+ " " + current_word);
 
           switch (current_token) {
-            case Token.BEGIN, Token.LEFT_PAREN, Token.LEFT_BRACE, Token.LEFT_BRACKET, Token.SINGLE_QUOTE, Token.DOUBLE_QUOTE:
+            case Token.BEGIN, Token.LEFT_PAREN, Token.LEFT_BRACE, Token.LEFT_BRACKET:
               stack.push(current_token);
               break;
-            case Token.RIGHT_PAREN, Token.RIGHT_BRACKET, Token.RIGHT_BRACE:
-              checkMatching(current_token);
+            case Token.SINGLE_QUOTE, Token.DOUBLE_QUOTE:
+              quoteCheck(current_token);
               break;
-            case Token.IDENT:
-              checkAssignmentStatement(current_line, current_token);
-              break;
-            default:
-              // ignore other tokens
+            case Token.RIGHT_PAREN, Token.RIGHT_BRACKET, Token.RIGHT_BRACE, Token.END:
+              // since right is 1 higher than left in all cases, this trick works
+              checkMatching(current_token - 1);
               break;
           }
         }
-      
+        // use current_line to check for
+        // Assignment statements
+        // Variable declarations ( and initializing)
+        // Arithmetic Operations
+        // Boolean Expressions
+        // “If” statements
       }
 
       // if stack is not empty, print error
@@ -103,6 +103,15 @@ public class SyntaxAnalyzer {
   private void checkMatching(int expectedDelimiter) {
     if (stack.isEmpty() || stack.peek() != expectedDelimiter) {
       System.out.println("Error: Mismatched delimiters");
+    } else {
+      stack.pop();
+    }
+  }
+
+  // check for single and double quotes
+  private void quoteCheck(int token) {
+    if (stack.isEmpty() || stack.peek() != token) {
+      stack.push(token);
     } else {
       stack.pop();
     }
