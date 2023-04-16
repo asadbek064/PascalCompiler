@@ -69,12 +69,7 @@ public class SyntaxAnalyzer {
               break;
           }
         }
-        // check for any remaining unmatched delimiters
-        checkStack();
-
-        // Clear delimiter stack for Token.SEMI_COLON since lines are already split by semicolons.
-        clearStack();
-        System.out.println();
+      
       }
 
       // if stack is not empty, print error
