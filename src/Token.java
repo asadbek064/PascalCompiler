@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Token {
+    public final static int IF = 6;
     public final static int BEGIN = 7;
     public final static int END = 8;
     public final static int RES_WORD = 9;
