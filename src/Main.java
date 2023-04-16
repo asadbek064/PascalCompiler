@@ -6,6 +6,8 @@ public class Main {
         String inputFile = "src/Input.txt";
         String outputFile = "src/Output.txt";
         String outputFile2 = "src/Output2.txt";
+        String outputFileSyntax = "src/OutputSyntax.txt";
+        String inputFileSyntax = outputFile2;
 
         if (args.length > 1) {
             inputFile = args[0];
@@ -13,9 +15,6 @@ public class Main {
         }
         /* Main driver */
         new LexicalAnalyzer(inputFile, outputFile, outputFile2);
-
-        String inputFileSyntax = outputFile2;
-        String outputFileSyntax = "src/OutputSyntax.txt";
         new SyntaxAnalyzer(inputFileSyntax, outputFileSyntax);
     }
 }

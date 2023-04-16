@@ -22,3 +22,4 @@ if string doesn't not match any categories mark as **UNKNOWN**
 javac Main.java
 javac Main .\Input.txt .\Output.txt
 ```
+
