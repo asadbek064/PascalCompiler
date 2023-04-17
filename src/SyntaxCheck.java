@@ -4,11 +4,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Stack;
-import java.util.List;
 
-public class SyntaxAnalyzer {
+public class SyntaxCheck {
   /* Variables */
   private int j;
   private Stack<Integer> stack = new Stack<Integer>();
@@ -22,15 +20,8 @@ public class SyntaxAnalyzer {
   private final int UNKNOWN = 99;
   private final int EOF = 100;
 
-  /* Token codes */
-  /*
-   * converted to class based
-   * easier to use while checking delimiters.
-   * just call Token.[keyword]
-   */
-
   /* Constructor */
-  public SyntaxAnalyzer(String inputFileName, String outputFileName) throws IOException {
+  public SyntaxCheck(String inputFileName, String outputFileName) throws IOException {
     try {
       out_fp = new FileWriter(outputFileName);
       String content = Files.readString(Paths.get(inputFileName)).replace(",,;,,", "");
@@ -64,12 +55,46 @@ public class SyntaxAnalyzer {
               break;
           }
         }
-        // use current_line to check for
+
+        // reconstruct current_line to original raw source
+        String raw_line = "";
+        for (int i = 0; i < current_line_length; i++) {
+            if(i % 2 == 1) {
+              raw_line += (' ' + current_line[i]);
+            }
+        }
+
         // Assignment statements
+        /*if (raw_line.contains())
+        if (!isPascalAssignment(raw_line)) {
+          System.out.println("ERROR: Not Valid Assignment statement: " + raw_line);
+        }*/
+
         // Variable declarations ( and initializing)
+       /* if(!isVariableDeclaration(raw_line)) {
+          System.out.println("ERROR: Not Var declaration/init: " + raw_line);
+        }*/
+
         // Arithmetic Operations
+        if(Operators.isArithmeticOperator(raw_line)) {
+          if(!isArithmeticOperation(raw_line)) {
+            System.out.println("ERROR: Not Valid Arithmetic Op: "+ raw_line);
+          }
+        }
+
         // Boolean Expressions
+        if(Operators.isRelationalOperator(raw_line)) {
+          if(!isBooleanOperation(raw_line)) {
+            System.out.println("ERROR: Not Valid Boolean Op: "+ raw_line);
+          }
+        }
+
         // “If” statements
+        if(raw_line.contains("if") || raw_line.contains("if(")) {
+          if(!isIfStatement(raw_line)) {
+            System.out.println("ERROR: Not Valid If statement: "+ raw_line);
+          }
+        }
       }
 
       // if stack is not empty, print error
@@ -83,20 +108,42 @@ public class SyntaxAnalyzer {
   }
 
   // Check for a valid assignment statement
-  private void checkAssignmentStatement(String[] current_line, int identifierIndex) {
-    if (identifierIndex >= current_line.length - 2) {
-      return; // Not enough tokens for an assignment statement
-    }
-    String assignToken = current_line[identifierIndex + 1];
-    String valueToken = current_line[identifierIndex + 2];
-    if (!assignToken.equals("=") || (!ValidCharacters.isIdentifier(valueToken) && !isNumeric(valueToken))) {
-      System.out.println("Error: Invalid assignment statement");
-    }
+  public static boolean isPascalAssignment(String line) {
+    return line.contains(":=") && !line.contains("=") && !line.contains(":=:");
   }
 
-  private boolean isNumeric(String token) {
-    // Check if the token is a valid number
-    return token.matches("-?\\d+(\\.\\d+)?");
+  // Check for a valid variable declaration
+  public static boolean isVariableDeclaration(String line) {
+    line = line.trim(); // remove leading and trailing white spaces
+    return line.contains("=") && !line.contains("==") && line.indexOf('=') == line.lastIndexOf('=');
+  }
+
+  // Check for Arithmetic Operations
+  public static boolean isArithmeticOperation(String line) {
+    line = line.trim(); // remove white spaces
+    for (String op : Operators.ARITHMETIC_OPERATORS) {
+      if (line.contains(op)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Check Boolean Expressions
+  public static boolean isBooleanOperation(String line) {
+    line = line.trim(); // remove leading and trailing white spaces
+    for (String op : Operators.RELATIONAL_OPERATORS) {
+      if (line.contains(op)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Check for if statements
+  public static boolean isIfStatement(String line) {
+    line = line.trim(); // remove leading and trailing white spaces
+    return line.startsWith("if ") || line.startsWith("if(");
   }
 
   // Check for matching delimiters (separators)
@@ -129,7 +176,7 @@ public class SyntaxAnalyzer {
   }
 
   // Check for any remaining unmatched delimiters
-  private void checkStack() {
+/*  private void checkStack() {
     while (!stack.isEmpty()) {
       switch (stack.pop()) {
         case Token.LEFT_PAREN:
@@ -152,7 +199,7 @@ public class SyntaxAnalyzer {
           break;
       }
     }
-  }
+  }*/
 
   public String RemoveComments(String text) {
     String startDelim = "25,,(,,23,,*";

@@ -15,6 +15,6 @@ public class Main {
         }
         /* Main driver */
         new LexicalAnalyzer(inputFile, outputFile, outputFile2);
-        new SyntaxAnalyzer(inputFileSyntax, outputFileSyntax);
+        new SyntaxCheck(inputFileSyntax, outputFileSyntax);
     }
 }

@@ -1,5 +1,5 @@
 public class Operators {
-    static final String[] ARITHMETIC_OPERATORS = {"+", "-", "*", "/"};
+    static final String[] ARITHMETIC_OPERATORS = {"+", "-", "*", "/", "--", "++"};
     static final String[] RELATIONAL_OPERATORS = {"=", "<>", "<", "<=", ">", ">="};
     static final String[] LOGICAL_OPERATORS = {"and", "or", "not"};
 

@@ -26,6 +26,7 @@ Next token is: 27	Next lexeme is:;
 Next token is: 11	Next lexeme is:Remainder
 Next token is: 31	Next lexeme is::
 Next token is: 11	Next lexeme is:INTEGER
+Next token is: 27	Next lexeme is:;
 Next token is: 11	Next lexeme is:Dimes
 Next token is: 20	Next lexeme is:=
 Next token is: 11	Next lexeme is:INTEGER
