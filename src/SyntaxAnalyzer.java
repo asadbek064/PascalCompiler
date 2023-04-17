@@ -8,18 +8,13 @@ import java.util.ArrayList;
 import java.util.Stack;
 import java.util.List;
 
-
-
 public class SyntaxAnalyzer {
   /* Variables */
   private int j;
   private Stack<Integer> stack = new Stack<Integer>();
-  private Stack<Integer> delimiterStack = new Stack<Integer>();
-  // private Stack<Integer> ifStack = new Stack<Integer>(); // Stack for nested "if" statements
   private FileReader in_fp;
   private FileWriter out_fp;
   private FileWriter out_fp2;
-
 
   /* Character classes */
   private final int LETTER = 0;
@@ -27,18 +22,18 @@ public class SyntaxAnalyzer {
   private final int UNKNOWN = 99;
   private final int EOF = 100;
 
-
   /* Token codes */
-  /* converted to class based
-     easier to use while checking delimiters.
-     just call Token.[keyword]
+  /*
+   * converted to class based
+   * easier to use while checking delimiters.
+   * just call Token.[keyword]
    */
 
   /* Constructor */
   public SyntaxAnalyzer(String inputFileName, String outputFileName) throws IOException {
     try {
       out_fp = new FileWriter(outputFileName);
-      String content = Files.readString(Paths.get(inputFileName)).replace(",,;,,","");
+      String content = Files.readString(Paths.get(inputFileName)).replace(",,;,,", "");
       content = RemoveComments(content);
       String[] lines = content.split(",,27");
       int top_of_stack;
@@ -48,67 +43,33 @@ public class SyntaxAnalyzer {
         int current_line_length = current_line.length;
 
         for (int i = 0; i < current_line_length; i += 2) {
-          System.out.print(current_line[i]);
-          System.out.print(current_line[i + 1]);
+          /*
+           * System.out.print(current_line[i]);
+           * System.out.print(current_line[i + 1]);
+           */
           int current_token = Integer.parseInt(current_line[i]);
           String current_word = current_line[i + 1];
+          // System.out.println(current_token+ " " + current_word);
 
-          // parantheses stack
-          if (current_token == Token.LEFT_PAREN) {
-            if (i != current_line_length - 2) {
-              // check if current symbol is not the last thing on the line
-              // (in which case it is an error)
-              stack.push(Token.LEFT_PAREN);
-            } else {
-              System.out.print("error - line ended with left paran");
-            }
+          switch (current_token) {
+            case Token.BEGIN, Token.LEFT_PAREN, Token.LEFT_BRACE, Token.LEFT_BRACKET:
+              stack.push(current_token);
+              break;
+            case Token.SINGLE_QUOTE, Token.DOUBLE_QUOTE:
+              quoteCheck(current_token);
+              break;
+            case Token.RIGHT_PAREN, Token.RIGHT_BRACKET, Token.RIGHT_BRACE, Token.END:
+              // since right is 1 higher than left in all cases, this trick works
+              checkMatching(current_token - 1);
+              break;
           }
-          if (current_token == Token.RIGHT_PAREN) {
-            top_of_stack = stack.pop();
-            if (top_of_stack != Token.LEFT_PAREN) {
-              System.out.println("error - parantheses/begin-end/quotes not paired properly");
-            }
-          }
-
-          // begin/end stack
-          if (String.valueOf(current_word) == "BEGIN") {
-            if (i != current_line_length - 2) {
-              // check if current symbol is not the last thing on the line
-              // (in which case it is an error)
-              stack.push(Token.BEGIN);
-            } else {
-              System.out.print("error - line ended with BEGIN");
-            }
-          }
-          if (String.valueOf(current_word) == "END") {
-            top_of_stack = stack.pop();
-            if (top_of_stack != Token.BEGIN) {
-              System.out.println("error - parantheses/begin-end/quotes not paired properly");
-            }
-          }
-
-          // single quote stack
-          if (current_token == Token.SINGLE_QUOTE) {
-            int top_of_stack_peek = stack.peek();
-            if (top_of_stack_peek == Token.SINGLE_QUOTE) {
-              stack.pop();
-            } else {
-              stack.push(Token.SINGLE_QUOTE);
-            }
-          }
-
-          // double quote stack
-          if (current_token == Token.DOUBLE_QUOTE) {
-            int top_of_stack_peek = stack.peek();
-            if (top_of_stack_peek == Token.DOUBLE_QUOTE) {
-              stack.pop();
-            } else {
-              stack.push(Token.DOUBLE_QUOTE);
-            }
-          }
-
         }
-        System.out.println();
+        // use current_line to check for
+        // Assignment statements
+        // Variable declarations ( and initializing)
+        // Arithmetic Operations
+        // Boolean Expressions
+        // “If” statements
       }
 
       // if stack is not empty, print error
@@ -119,55 +80,58 @@ public class SyntaxAnalyzer {
     } catch (FileNotFoundException e) {
       System.out.println("ERROR - cannot open " + inputFileName);
     }
-    // for matching, have a stack, and when you hit a close if it does not match the
-    // open that is on the stack, print an error
-    // for assignment statements, make sure that it's IDENT = number or IDENT
-    // one main function that keeps checking the next lexem, call smaller functions
-    // based on that, build the stack inside of that
-    // stack should be global so everyone can access it
-    // each function should run until it hits the end of a semi-colon
-
   }
-
-
-  // Check for matching delimiters (separators)
-  private void checkMatchingDelimiter(int expectedDelimiter) {
-    if (delimiterStack.isEmpty() || delimiterStack.peek() != expectedDelimiter) {
-      System.out.println("Error: Mismatched delimiters");
-    } else {
-      delimiterStack.pop();
-    }
-  }
-
-  // Clear outdated delimiter stack
-  private void clearDelimiterStack() {
-    while (!delimiterStack.isEmpty() && delimiterStack.peek() != Token.LEFT_BRACE) {
-      delimiterStack.pop();
-    }
-    // Remove left brace from stack
-    if (!delimiterStack.isEmpty() && delimiterStack.peek() == Token.LEFT_BRACE) {
-      delimiterStack.pop();
-    }
-  }
-
 
   // Check for a valid assignment statement
-  private void checkAssignmentsStatement(List<Token> tokens, Token identifierToken) {
-    int index = tokens.indexOf(identifierToken);
-    if (index >= tokens.size() - 2) {
+  private void checkAssignmentStatement(String[] current_line, int identifierIndex) {
+    if (identifierIndex >= current_line.length - 2) {
       return; // Not enough tokens for an assignment statement
     }
-    Token assignToken = tokens.get(index + 1);
-    Token valueToken = tokens.get(index + 2);
-    if (assignToken.getType() != Token.ASSIGN_OP || (valueToken.getType() != Token.IDENT && valueToken.getType() != Token.INT_LIT)) {
+    String assignToken = current_line[identifierIndex + 1];
+    String valueToken = current_line[identifierIndex + 2];
+    if (!assignToken.equals("=") || (!ValidCharacters.isIdentifier(valueToken) && !isNumeric(valueToken))) {
       System.out.println("Error: Invalid assignment statement");
     }
   }
 
+  private boolean isNumeric(String token) {
+    // Check if the token is a valid number
+    return token.matches("-?\\d+(\\.\\d+)?");
+  }
+
+  // Check for matching delimiters (separators)
+  private void checkMatching(int expectedDelimiter) {
+    if (stack.isEmpty() || stack.peek() != expectedDelimiter) {
+      System.out.println("Error: Mismatched delimiters");
+    } else {
+      stack.pop();
+    }
+  }
+
+  // check for single and double quotes
+  private void quoteCheck(int token) {
+    if (stack.isEmpty() || stack.peek() != token) {
+      stack.push(token);
+    } else {
+      stack.pop();
+    }
+  }
+
+  // Clear outdated delimiter stack
+  private void clearStack() {
+    while (!stack.isEmpty() && stack.peek() != Token.LEFT_BRACE) {
+      stack.pop();
+    }
+    // Remove left brace from stack
+    if (!stack.isEmpty() && stack.peek() == Token.LEFT_BRACE) {
+      stack.pop();
+    }
+  }
+
   // Check for any remaining unmatched delimiters
-  private void checkDelimiterStack() {
-    while (!delimiterStack.isEmpty()) {
-      switch (delimiterStack.pop()) {
+  private void checkStack() {
+    while (!stack.isEmpty()) {
+      switch (stack.pop()) {
         case Token.LEFT_PAREN:
           System.out.println("Error: Mismatched parentheses");
           break;

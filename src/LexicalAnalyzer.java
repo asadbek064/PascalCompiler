@@ -191,7 +191,7 @@ class LexicalAnalyzer {
         out_fp2.write(nextToken + ",," + String.valueOf(lexeme).trim() + ",,");
 
         // for debugging
-        System.out.println("Next token is: " + nextToken + "\tNext lexem is:" + String.valueOf(lexeme).trim() + "");
+        //System.out.println("Next token is: " + nextToken + "\tNext lexem is:" + String.valueOf(lexeme).trim() + "");
         lexeme = new char[100];
         return nextToken;
     }
