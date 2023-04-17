@@ -65,15 +65,18 @@ public class SyntaxCheck {
         }
 
         // Assignment statements
-        /*if (raw_line.contains())
-        if (!isPascalAssignment(raw_line)) {
-          System.out.println("ERROR: Not Valid Assignment statement: " + raw_line);
-        }*/
+        if (raw_line.contains(":=")){
+          if (!isPascalAssignment(raw_line)) {
+            System.out.println("ERROR: Not Valid Assignment statement: " + raw_line);
+          }
+        }
 
         // Variable declarations ( and initializing)
-       /* if(!isVariableDeclaration(raw_line)) {
-          System.out.println("ERROR: Not Var declaration/init: " + raw_line);
-        }*/
+        if (raw_line.contains("var")) {
+          if(!isVariableDeclaration(raw_line)) {
+            System.out.println("ERROR: Not Var declaration/init: " + raw_line);
+          }
+        }
 
         // Arithmetic Operations
         if(Operators.isArithmeticOperator(raw_line)) {

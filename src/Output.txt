@@ -16,7 +16,9 @@ Next token is: 11	Next lexeme is:from
 Next token is: 11	Next lexeme is:Dollar
 Next token is: 31	Next lexeme is::
 Next token is: 20	Next lexeme is:=
-Next token is: 10	Next lexeme is:100
+Next token is: 31	Next lexeme is::
+Next token is: 20	Next lexeme is:=
+Next token is: 31	Next lexeme is::
 Next token is: 27	Next lexeme is:;
 Next token is: 9	Next lexeme is:VAR
 Next token is: 11	Next lexeme is:Cost

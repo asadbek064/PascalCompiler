@@ -1,3 +1,5 @@
+# PascalCompiler
+
 ## Lexical Analyzer
 - Input txt (Pascal statements)
 - Perform lexical analysis on each statement
@@ -12,10 +14,22 @@
 - Need list structure for **operators by category**
 - Need list structure for **characters for variables/constants**
 
-## Tests
-Test validity of **identifiers**
-ex:
-if string doesn't not match any categories mark as **UNKNOWN**
+## Syntax Check
+```
+9,,PROGRAM,,11,,ChangeMaker,,27,,;,,25,,(,,23,,*,,11,,Make,,11,,change,,9,,
+```
+Take the output from lexical analyzer and apply checks for
+- Removes Comments
+- Matching on parens, quotes, begin/end etc.
+- Assignment statements
+- Variable declarations ( and initializing)
+- Arithmetic Operations
+- Boolean Expressions
+- “If” statements
+
+[//]: # (- While loop &#40;not the body&#41;)
+
+[//]: # (- For loop &#40;not the body&#41;)
 
 ## How to run
 ```bash
