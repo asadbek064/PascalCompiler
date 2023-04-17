@@ -1,7 +1,7 @@
 PROGRAM  ChangeMaker;
   (* Make change  for a dollar *)
   CONST remove from
-  Dollar := 100;
+  Dollar := :=:;
   VAR
   Cost:      INTEGER;
   Remainder: INTEGER;
