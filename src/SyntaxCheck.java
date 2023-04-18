@@ -139,6 +139,9 @@ public class SyntaxCheck {
     if (line[1].equals("VAR")) {
       start_index += 2;
     }
+    if (line.length != 6 + start_index) {
+      return false;
+    }
     String[] types = { "INTEGER", "STRING", "REAL", "CHARACTER", "BOOLEAN", "SET", "ARRAY" };
     Boolean part_one = false;
     Boolean part_two = false;
@@ -193,8 +196,13 @@ public class SyntaxCheck {
     if (!part_two) {
       return false;
     }
-    if (Integer.parseInt(line[4]) == Token.INT_LIT || Integer.parseInt(line[4]) == Token.IDENT) {
-      part_two = true;
+    String[] new_line = new String[line.length - 4];
+    for (int i = 4; i < line.length; i++) {
+      new_line[i - 4] = line[i];
+    }
+    if ((line.length == 6 && (Integer.parseInt(line[4]) == Token.INT_LIT || Integer.parseInt(line[4]) == Token.IDENT))
+        || isArithmeticOperation(new_line)) {
+      part_three = true;
     } else {
       return false;
     }
