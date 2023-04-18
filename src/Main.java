@@ -16,5 +16,7 @@ public class Main {
         /* Main driver */
         new LexicalAnalyzer(inputFile, outputFile, outputFile2);
         new SyntaxCheck(inputFileSyntax, outputFileSyntax);
+        
+        // https://www.tutorialspoint.com/pascal/pascal_basic_syntax.htm
     }
 }
