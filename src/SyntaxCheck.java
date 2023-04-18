@@ -57,45 +57,40 @@ public class SyntaxCheck {
         }
 
         // reconstruct current_line to original raw source
+        String examine_line = line.replaceAll(",,", " ");
         String raw_line = "";
         for (int i = 0; i < current_line_length; i++) {
-            if(i % 2 == 1) {
-              raw_line += (' ' + current_line[i]);
-            }
+          if (i % 2 == 1) {
+            raw_line += (' ' + current_line[i]);
+          }
         }
 
         // Assignment statements
-        if (raw_line.contains(":=")){
-          if (!isPascalAssignment(raw_line)) {
+        if (examine_line.contains("=") && !(examine_line.contains("IF") || examine_line.contains("WHILE"))) {
+          if (!isPascalAssignment(current_line)) {
             System.out.println("ERROR: Not Valid Assignment statement: " + raw_line);
           }
         }
 
         // Variable declarations ( and initializing)
-        if (raw_line.contains("var")) {
-          if(!isVariableDeclaration(raw_line)) {
-            System.out.println("ERROR: Not Var declaration/init: " + raw_line);
+        if (examine_line.contains(":") && !(examine_line.contains("=")) && !(examine_line.contains("'"))
+            && !(examine_line.contains(String.valueOf(Token.DOUBLE_QUOTE)))) {
+          if (!isVariableDeclaration(current_line)) {
+            System.out.println("ERROR: Not Valid declaration/init: " + raw_line);
           }
         }
 
-        // Arithmetic Operations
-        if(Operators.isArithmeticOperator(raw_line)) {
-          if(!isArithmeticOperation(raw_line)) {
-            System.out.println("ERROR: Not Valid Arithmetic Op: "+ raw_line);
-          }
-        }
-
-        // Boolean Expressions
-        if(Operators.isRelationalOperator(raw_line)) {
-          if(!isBooleanOperation(raw_line)) {
-            System.out.println("ERROR: Not Valid Boolean Op: "+ raw_line);
-          }
-        }
+        // // Boolean Expressions
+        // if (Operators.isRelationalOperator(raw_line)) {
+        // if (!isBooleanOperation(raw_line)) {
+        // System.out.println("ERROR: Not Valid Boolean Op: " + raw_line);
+        // }
+        // }
 
         // “If” statements
-        if(raw_line.contains("if") || raw_line.contains("if(")) {
-          if(!isIfStatement(raw_line)) {
-            System.out.println("ERROR: Not Valid If statement: "+ raw_line);
+        if (current_line[1].equals("IF")) {
+          if (!isIfStatement(current_line, examine_line)) {
+            System.out.println("ERROR: Not Valid If statement: " + raw_line);
           }
         }
       }
@@ -111,42 +106,156 @@ public class SyntaxCheck {
   }
 
   // Check for a valid assignment statement
-  public static boolean isPascalAssignment(String line) {
-    return line.contains(":=") && !line.contains("=") && !line.contains(":=:");
+  public static boolean isPascalAssignment(String[] line) {
+    Boolean part_one = false;
+    Boolean part_two = false;
+    Boolean part_three = false;
+    if (Integer.parseInt(line[0]) == Token.IDENT) {
+      part_one = true;
+    } else {
+      return false;
+    }
+    if (line[3].equals(":") && line[5].equals("=")) {
+      part_two = true;
+    } else {
+      return false;
+    }
+    String[] new_line = new String[line.length - 6];
+    for (int i = 6; i < line.length; i++) {
+      new_line[i - 6] = line[i];
+    }
+    // can either be assigning to a var or it must be an arithmetic operation
+    if (isArithmeticOperation(new_line) || Integer.parseInt(line[6]) == Token.IDENT) {
+      part_three = true;
+    } else {
+      return false;
+    }
+    return true;
   }
 
   // Check for a valid variable declaration
-  public static boolean isVariableDeclaration(String line) {
-    line = line.trim(); // remove leading and trailing white spaces
-    return line.contains("=") && !line.contains("==") && line.indexOf('=') == line.lastIndexOf('=');
+  public static boolean isVariableDeclaration(String[] line) {
+    int start_index = 0;
+    if (line[1].equals("VAR")) {
+      start_index += 2;
+    }
+    String[] types = { "INTEGER", "STRING", "REAL", "CHARACTER", "BOOLEAN", "SET", "ARRAY" };
+    Boolean part_one = false;
+    Boolean part_two = false;
+    Boolean part_three = false;
+
+    // test to make sure parseInt does not break down
+    try {
+      int j = Integer.parseInt(line[start_index]);
+    } catch (Exception e) {
+      return false;
+    } finally {
+      int k;
+    }
+
+    // regular code
+    if (Integer.parseInt(line[start_index]) == Token.IDENT) {
+      part_one = true;
+    } else {
+      return false;
+    }
+    if (line[start_index + 3].equals(":")) {
+      part_two = true;
+    } else {
+      return false;
+    }
+    for (String op : types) {
+      if (line[start_index + 5].equals(op)) {
+        part_three = true;
+      }
+    }
+    if (!(part_three)) {
+      return false;
+    }
+    return true;
   }
 
   // Check for Arithmetic Operations
-  public static boolean isArithmeticOperation(String line) {
-    line = line.trim(); // remove white spaces
+  public static boolean isArithmeticOperation(String[] line) {
+    Boolean part_one = false;
+    Boolean part_two = false;
+    Boolean part_three = false;
+    if (Integer.parseInt(line[0]) == Token.INT_LIT || Integer.parseInt(line[0]) == Token.IDENT) {
+      part_one = true;
+    } else {
+      return false;
+    }
     for (String op : Operators.ARITHMETIC_OPERATORS) {
-      if (line.contains(op)) {
-        return true;
+      if (line[3].equals(op)) {
+        part_two = true;
       }
     }
-    return false;
+    if (!part_two) {
+      return false;
+    }
+    if (Integer.parseInt(line[4]) == Token.INT_LIT || Integer.parseInt(line[4]) == Token.IDENT) {
+      part_two = true;
+    } else {
+      return false;
+    }
+    return true;
   }
 
   // Check Boolean Expressions
-  public static boolean isBooleanOperation(String line) {
-    line = line.trim(); // remove leading and trailing white spaces
-    for (String op : Operators.RELATIONAL_OPERATORS) {
-      if (line.contains(op)) {
-        return true;
-      }
+  public static boolean isBooleanOperation(String[] line) {
+    Boolean part_one = false;
+    Boolean part_two = false;
+    Boolean part_three = false;
+    Boolean part_four = false;
+    if (Integer.parseInt(line[0]) == Token.LEFT_PAREN && Integer.parseInt(line[8]) == Token.RIGHT_PAREN) {
+      part_one = true;
+    } else {
+      return false;
     }
-    return false;
+
+    if (Integer.parseInt(line[2]) == Token.IDENT || Integer.parseInt(line[2]) == Token.INT_LIT) {
+      part_two = true;
+    } else {
+      return false;
+    }
+
+    if (Integer.parseInt(line[6]) == Token.IDENT || Integer.parseInt(line[6]) == Token.INT_LIT) {
+      part_three = true;
+    } else {
+      return false;
+    }
+
+    if (Integer.parseInt(line[4]) == Token.ASSIGN_OP) {
+      part_four = true;
+    } else {
+      return false;
+    }
+
+    return true;
   }
 
   // Check for if statements
-  public static boolean isIfStatement(String line) {
-    line = line.trim(); // remove leading and trailing white spaces
-    return line.startsWith("if ") || line.startsWith("if(");
+  public static boolean isIfStatement(String[] line, String string_line) {
+    String[] new_line = new String[10];
+    for (int i = 2; i < 12; i++) {
+      new_line[i - 2] = line[i];
+    }
+    Boolean part_one = false;
+    if (isBooleanOperation(new_line)) {
+      part_one = true;
+    } else {
+      return false;
+    }
+
+    if (!(line[13].equals("THEN"))) {
+      return false;
+    }
+
+    if (!(string_line.contains("ELSE"))) {
+      return false;
+    }
+    return true;
+    // return line.startsWith("if ") || line.startsWith("if(");
   }
 
   // Check for matching delimiters (separators)
@@ -179,30 +288,36 @@ public class SyntaxCheck {
   }
 
   // Check for any remaining unmatched delimiters
-/*  private void checkStack() {
-    while (!stack.isEmpty()) {
-      switch (stack.pop()) {
-        case Token.LEFT_PAREN:
-          System.out.println("Error: Mismatched parentheses");
-          break;
-        case Token.LEFT_BRACKET:
-          System.out.println("Error: Mismatched square brackets");
-          break;
-        case Token.LEFT_BRACE:
-          System.out.println("Error: Mismatched curly braces");
-          break;
-        case Token.SINGLE_QUOTE:
-          System.out.println("Error: Unterminated string literal: missing open/close single quote");
-          break;
-        case Token.DOUBLE_QUOTE:
-          System.out.println("Error: Unterminated string literal: missing open/close double quote");
-          break;
-        case Token.BEGIN:
-          System.out.println("Error: Missing END");
-          break;
-      }
-    }
-  }*/
+  /*
+   * private void checkStack() {
+   * while (!stack.isEmpty()) {
+   * switch (stack.pop()) {
+   * case Token.LEFT_PAREN:
+   * System.out.println("Error: Mismatched parentheses");
+   * break;
+   * case Token.LEFT_BRACKET:
+   * System.out.println("Error: Mismatched square brackets");
+   * break;
+   * case Token.LEFT_BRACE:
+   * System.out.println("Error: Mismatched curly braces");
+   * break;
+   * case Token.SINGLE_QUOTE:
+   * System.out.
+   * println("Error: Unterminated string literal: missing open/close single quote"
+   * );
+   * break;
+   * case Token.DOUBLE_QUOTE:
+   * System.out.
+   * println("Error: Unterminated string literal: missing open/close double quote"
+   * );
+   * break;
+   * case Token.BEGIN:
+   * System.out.println("Error: Missing END");
+   * break;
+   * }
+   * }
+   * }
+   */
 
   public String RemoveComments(String text) {
     String startDelim = "25,,(,,23,,*";
